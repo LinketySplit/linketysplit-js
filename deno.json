@@ -1,6 +1,6 @@
 {
   "name": "@linketysplit/linketysplit-js",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "exports": "./mod.ts",
   "imports": {
     "jose": "npm:jose@^5.6.2"
