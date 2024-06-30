@@ -4,7 +4,8 @@ import {
   ArticlePurchaseUrlPayload,
   VerifyArticleAccessResponse
 } from './types';
-import { SignJWT } from 'jose';
+import { SignJWT } from 'jose'
+
 
 export class PublicationSDK {
   static readonly ORIGIN = 'https://linketysplit.com';
