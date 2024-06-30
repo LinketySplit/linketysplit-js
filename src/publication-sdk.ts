@@ -4,8 +4,7 @@ import type {
   ArticlePurchaseUrlPayload,
   VerifyArticleAccessResponse
 } from './types.ts';
-import { SignJWT } from 'npm:jose'
-
+import { SignJWT } from 'npm:jose@5.6.2';
 
 export class PublicationSDK {
   static readonly ORIGIN = 'https://linketysplit.com';
@@ -71,7 +70,7 @@ export class PublicationSDK {
    * @return {string} The validated permalink as a string.
    * @throws {Error} If the permalink is not a valid canonical URL.
    */
-  public static validateArticlePermalink(permalink: string|URL): string {
+  public static validateArticlePermalink(permalink: string | URL): string {
     let url: URL;
     try {
       url = new URL(permalink);
@@ -83,16 +82,16 @@ export class PublicationSDK {
       throw new Error('Permalink must use "https://"');
     }
     if (url.search || url.hash || url.username || url.password) {
-      throw new Error('Permalink must not contain any query parameters, user/password, query strings, or hash fragments');
+      throw new Error(
+        'Permalink must not contain any query parameters, user/password, query strings, or hash fragments'
+      );
     }
     return url.toString();
   }
 
-
-  
   /**
    * Validates the given article pricing data.
-   * 
+   *
    * - `price` must be an integer greater than 0
    * - `discounts` must be an array of objects with `minimumQuantity` and `discountPercentage`
    * - each `discount` `discountPercentage` must be greater than the previous `discountPercentage`
@@ -156,7 +155,6 @@ export class PublicationSDK {
     return data;
   }
 
-  
   /**
    * Make an API request to verify the access to an article using the provided access ID.
    *
@@ -176,8 +174,6 @@ export class PublicationSDK {
     );
   }
 
-
-  
   /**
    * Makes an API request to the specified URL with the provided data.
    *
