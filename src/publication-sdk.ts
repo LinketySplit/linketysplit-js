@@ -1,10 +1,10 @@
-import { ApiCallError } from './api-call-error';
-import {
+import { ApiCallError } from './api-call-error.ts';
+import type {
   ArticlePricingData,
   ArticlePurchaseUrlPayload,
   VerifyArticleAccessResponse
-} from './types';
-import { SignJWT } from 'jose'
+} from './types.ts';
+import { SignJWT } from 'npm:jose'
 
 
 export class PublicationSDK {
