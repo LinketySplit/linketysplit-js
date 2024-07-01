@@ -2,7 +2,13 @@
   "name": "@linketysplit/linketysplit-js",
   "version": "0.1.4",
   "exports": "./mod.ts",
+  "test": {
+    "include": ["src/**/*.test.ts"]
+  },
   "imports": {
     "jose": "npm:jose@^5.6.2"
+  },
+  "tasks": {
+    "test:unit":"rm -rf cov_profile && deno test  --allow-net --coverage=cov_profile  && deno coverage cov_profile --html"
   }
 }

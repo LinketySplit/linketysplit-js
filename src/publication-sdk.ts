@@ -5,11 +5,16 @@ import type {
   VerifyArticleAccessResponse
 } from './types.ts';
 import { SignJWT } from 'npm:jose@5.6.2';
+import { validateArticlePermalink, validateArticlePricing } from "./validators.ts";
 
 export class PublicationSDK {
+  /** The origin of LinketySplit. */
   static readonly ORIGIN = 'https://linketysplit.com';
+  /** The publication API path. */
   static readonly API_PATH = 'api/v1/publication';
+  /** The purchase page path. */
   static readonly PURCHASE_LINK_PATH = 'purchase-link';
+  /** Then search parameter name for an article access link. */
   static readonly ARTICLE_ACCESS_LINK_PARAM = 'linketysplit_access';
 
   /**
@@ -43,11 +48,11 @@ export class PublicationSDK {
     showSharingContext?: boolean
   ): Promise<string> {
     const payload: ArticlePurchaseUrlPayload = {
-      permalink: PublicationSDK.validateArticlePermalink(permalink)
+      permalink: validateArticlePermalink(permalink)
     };
     if (customPricing) {
       payload.customPricing =
-        PublicationSDK.validateArticlePricing(customPricing);
+        validateArticlePricing(customPricing);
     }
     if (showSharingContext === true) {
       payload.showSharingContext = true;
@@ -58,103 +63,12 @@ export class PublicationSDK {
       .setProtectedHeader({ alg })
       .setIssuedAt();
     const jwt = await signer.sign(encodedSecret);
-    return [PublicationSDK.ORIGIN, PublicationSDK.API_PATH, jwt].join('/');
+    return [PublicationSDK.ORIGIN, PublicationSDK.PURCHASE_LINK_PATH, jwt].join('/');
   }
 
-  /**
-   * Validates the given article permalink. Permalinks must be:
-   * - canonical URLs, i.e. without any query parameters, user/password, query strings. or hash fragments
-   * - secure (https://)
-   *
-   * @param {string|URL} permalink - The permalink to validate.
-   * @return {string} The validated permalink as a string.
-   * @throws {Error} If the permalink is not a valid canonical URL.
-   */
-  public static validateArticlePermalink(permalink: string | URL): string {
-    let url: URL;
-    try {
-      url = new URL(permalink);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      throw new Error('Permalink is not valid.');
-    }
-    if (url.protocol !== 'https:') {
-      throw new Error('Permalink must use "https://"');
-    }
-    if (url.search || url.hash || url.username || url.password) {
-      throw new Error(
-        'Permalink must not contain any query parameters, user/password, query strings, or hash fragments'
-      );
-    }
-    return url.toString();
-  }
+  
 
-  /**
-   * Validates the given article pricing data.
-   *
-   * - `price` must be an integer greater than 0
-   * - `discounts` must be an array of objects with `minimumQuantity` and `discountPercentage`
-   * - each `discount` `discountPercentage` must be greater than the previous `discountPercentage`
-   *
-   * @param {ArticlePricingData} pricing - The pricing data to validate.
-   * @return {ArticlePricingData} The validated pricing data.
-   * @throws {Error} If the pricing data is invalid.
-   */
-  public static validateArticlePricing(
-    pricing: ArticlePricingData
-  ): ArticlePricingData {
-    const { price } = pricing;
-    if (Number.isNaN(price) || !Number.isInteger(price) || price <= 0) {
-      throw new Error('Price must be an integer greater than 0.');
-    }
-    const data: Required<ArticlePricingData> = {
-      price,
-      discounts: []
-    };
-    const rawDiscounts = Array.isArray(pricing.discounts)
-      ? pricing.discounts
-      : [];
-
-    for (let i = 0; i < rawDiscounts.length; i++) {
-      const discount = rawDiscounts[i];
-      const { discountPercentage, minimumQuantity } = discount;
-      if (
-        Number.isNaN(minimumQuantity) ||
-        !Number.isInteger(minimumQuantity) ||
-        minimumQuantity < 2
-      ) {
-        throw new Error(
-          'Minimum quantity must be an integer greater than or equal to 2.'
-        );
-      }
-
-      if (
-        Number.isNaN(discountPercentage) ||
-        discountPercentage <= 0 ||
-        discountPercentage >= 100
-      ) {
-        throw new Error(
-          'Discount percentage must be a number greater than 0 and less than 100.'
-        );
-      }
-      data.discounts.push({
-        minimumQuantity,
-        discountPercentage
-      });
-    }
-    data.discounts.sort((a, b) => a.minimumQuantity - b.minimumQuantity);
-    for (let i = 0; i < data.discounts.length; i++) {
-      const discount = data.discounts[i];
-      const prevPct = i === 0 ? 0 : data.discounts[i - 1].discountPercentage;
-      if (discount.discountPercentage <= prevPct) {
-        throw new Error(
-          `Each tier discount percentage must be greater than the previous tier's discount.`
-        );
-      }
-    }
-    return data;
-  }
-
+ 
   /**
    * Make an API request to verify the access to an article using the provided access ID.
    *
@@ -216,7 +130,7 @@ export class PublicationSDK {
           message = data.message;
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
+      } catch (_error) {
         // ignore
       }
       throw new ApiCallError(message, response.status, response.statusText);
