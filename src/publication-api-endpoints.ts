@@ -1,5 +1,5 @@
 import { ApiCallError } from '../mod.ts';
-import { ORIGIN, PUBLICATION_API_PATH } from './constants.ts';
+import { LINKETYSPLIT_ORIGIN, PUBLICATION_API_PATH } from './constants.ts';
 import type {
   ArticleResponse,
   PublicationResponse,
@@ -85,7 +85,7 @@ export class PublicationApiEndpoints {
     postData?: Record<string, unknown>
   ): Promise<T> {
     const parts = [
-      ORIGIN,
+      LINKETYSPLIT_ORIGIN,
       PUBLICATION_API_PATH,
       ...slugs.map((slug) => encodeURIComponent(slug))
     ];

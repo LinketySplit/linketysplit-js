@@ -1,5 +1,5 @@
 /** The origin of LinketySplit. */
-export const ORIGIN = 'https://linketysplit.com';
+export const LINKETYSPLIT_ORIGIN = 'https://linketysplit.com';
 /** The publication API path. */
 export const PUBLICATION_API_PATH = 'api/v1/publication';
 /** The purchase page path. */

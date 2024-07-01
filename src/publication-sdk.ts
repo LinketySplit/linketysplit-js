@@ -8,7 +8,7 @@ import {
   validateArticlePermalink,
   validateArticlePricing
 } from './validators.ts';
-import { ORIGIN, PURCHASE_LINK_PATH, ARTICLE_ACCESS_LINK_PARAM } from './constants.ts';
+import { LINKETYSPLIT_ORIGIN, PURCHASE_LINK_PATH, ARTICLE_ACCESS_LINK_PARAM } from './constants.ts';
 import { PublicationApiEndpoints } from "./publication-api-endpoints.ts";
 
 export class PublicationSDK {
@@ -60,7 +60,7 @@ export class PublicationSDK {
       .setProtectedHeader({ alg })
       .setIssuedAt();
     const jwt = await signer.sign(encodedSecret);
-    return [ORIGIN, PURCHASE_LINK_PATH, jwt].join('/');
+    return [LINKETYSPLIT_ORIGIN, PURCHASE_LINK_PATH, jwt].join('/');
   }
 
 
