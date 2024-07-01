@@ -1,5 +1,8 @@
 /**
- * An error returned by an API call.
+ * An error thrown when an an API call fails.
+ * This may be caused by a 4xx or 5xx HTTP status code.
+ * If the code is in the 4xx range, the status message will be a
+ * specific error message from the API.
  * 
  */
 export class ApiCallError extends Error {

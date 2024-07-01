@@ -1,5 +1,5 @@
 import { ApiCallError } from '../mod.ts';
-import { ORIGIN, API_PATH } from './constants.ts';
+import { ORIGIN, PUBLICATION_API_PATH } from './constants.ts';
 import type {
   ArticleResponse,
   PublicationResponse,
@@ -56,6 +56,8 @@ export class PublicationApiEndpoints {
 
   /**
    * Make an API request to verify the access to an article using the provided access ID.
+   * Note that you should inspect the response data to check  `articleAccess.accessGranted`.
+   * If `true`, the reader shold be shown the full article.
    *
    * @param {string} accessId - The ID of the article access to verify.
    * @return {Promise<VerifyArticleAccessResponse>} The verification result
@@ -84,7 +86,7 @@ export class PublicationApiEndpoints {
   ): Promise<T> {
     const parts = [
       ORIGIN,
-      API_PATH,
+      PUBLICATION_API_PATH,
       ...slugs.map((slug) => encodeURIComponent(slug))
     ];
     const apiUrl = parts.join('/');
