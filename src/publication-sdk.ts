@@ -1,13 +1,14 @@
 import type {
   ArticlePricingData,
   ArticlePurchaseUrlPayload,
+  VerifyArticleAccessResponse
 } from './types.ts';
 import { SignJWT } from 'npm:jose@5.6.2';
 import {
   validateArticlePermalink,
   validateArticlePricing
 } from './validators.ts';
-import { ORIGIN, PURCHASE_LINK_PATH } from './constants.ts';
+import { ORIGIN, PURCHASE_LINK_PATH, ARTICLE_ACCESS_LINK_PARAM } from './constants.ts';
 import { PublicationApiEndpoints } from "./publication-api-endpoints.ts";
 
 export class PublicationSDK {
@@ -60,5 +61,28 @@ export class PublicationSDK {
       .setIssuedAt();
     const jwt = await signer.sign(encodedSecret);
     return [ORIGIN, PURCHASE_LINK_PATH, jwt].join('/');
+  }
+
+
+  /**
+   * Inspects an article request URL to see if it is a LinketySplit article access URL.
+   * If the URL is an article access URL, this method verifies the reader's access to the article by
+   * calling the `verifyArticleAccess` endpoint, and returns a `VerifyArticleAccessResponse` object.
+   * 
+   * Otherwise, it returns `null`.
+   *
+   * @param {URL} requestUrl The request URL.
+   * @return {Promise<VerifyArticleAccessResponse|null>} A promise that resolves to the
+   * VerifyArticleAccessResponse object if a LinketySplit article access ID is 
+   * found in the URL, or null if not.
+   */
+  async handleArticleRequestUrl(requestUrl: URL): Promise<VerifyArticleAccessResponse|null> {
+    if (requestUrl.searchParams.has(ARTICLE_ACCESS_LINK_PARAM)) {
+      const accessId = requestUrl.searchParams.get(ARTICLE_ACCESS_LINK_PARAM);
+      if (accessId) {
+        return await this.endpoints.verifyArticleAccess(accessId);
+      }
+    }
+    return null;
   }
 }
