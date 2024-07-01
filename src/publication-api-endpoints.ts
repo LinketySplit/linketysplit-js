@@ -1,6 +1,7 @@
 import { ApiCallError } from '../mod.ts';
 import { ORIGIN, API_PATH } from './constants.ts';
 import type {
+  ArticleResponse,
   PublicationResponse,
   VerifyArticleAccessResponse
 } from './types.ts';
@@ -23,11 +24,34 @@ export class PublicationApiEndpoints {
 
   /**
    * Gets data for the publication identified by the API key.
-   * 
+   *
    * @returns {Promise<PublicationResponse>} The publication data
    */
-  public async publication(): Promise<PublicationResponse> {
+  public async getPublication(): Promise<PublicationResponse> {
     return await this.makeApiRequest<PublicationResponse>([]);
+  }
+
+  /**
+   * Retrieves an article with the specified permalink.
+   *
+   * @param {string} permalink - The permalink of the article to retrieve.
+   * @return {Promise<ArticleResponse>} The response containing the requested article data.
+   */
+  public async getArticle(permalink: string): Promise<ArticleResponse> {
+    return await this.makeApiRequest<ArticleResponse>(['article', permalink]);
+  }
+
+  /**
+   * Upserts an article with the given permalink.
+   *
+   * @param {string} permalink - The permalink of the article.
+   * @return {Promise<ArticleResponse>} - A promise that resolves to the response
+   * containing the upserted article data.
+   */
+  public async upsertArticle(permalink: string): Promise<ArticleResponse> {
+    return await this.makeApiRequest<ArticleResponse>(['article'], {
+      permalink
+    });
   }
 
   /**

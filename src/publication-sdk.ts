@@ -1,22 +1,15 @@
-import { ApiCallError } from './api-call-error.ts';
 import type {
   ArticlePricingData,
   ArticlePurchaseUrlPayload,
-  VerifyArticleAccessResponse
 } from './types.ts';
 import { SignJWT } from 'npm:jose@5.6.2';
-import { validateArticlePermalink, validateArticlePricing } from "./validators.ts";
+import {
+  validateArticlePermalink,
+  validateArticlePricing
+} from './validators.ts';
+import { ORIGIN, PURCHASE_LINK_PATH } from './constants.ts';
 
 export class PublicationSDK {
-  /** The origin of LinketySplit. */
-  static readonly ORIGIN = 'https://linketysplit.com';
-  /** The publication API path. */
-  static readonly API_PATH = 'api/v1/publication';
-  /** The purchase page path. */
-  static readonly PURCHASE_LINK_PATH = 'purchase-link';
-  /** Then search parameter name for an article access link. */
-  static readonly ARTICLE_ACCESS_LINK_PARAM = 'linketysplit_access';
-
   /**
    * Constructor for the PublicationSDK class.
    *
@@ -51,8 +44,7 @@ export class PublicationSDK {
       permalink: validateArticlePermalink(permalink)
     };
     if (customPricing) {
-      payload.customPricing =
-        validateArticlePricing(customPricing);
+      payload.customPricing = validateArticlePricing(customPricing);
     }
     if (showSharingContext === true) {
       payload.showSharingContext = true;
@@ -63,79 +55,6 @@ export class PublicationSDK {
       .setProtectedHeader({ alg })
       .setIssuedAt();
     const jwt = await signer.sign(encodedSecret);
-    return [PublicationSDK.ORIGIN, PublicationSDK.PURCHASE_LINK_PATH, jwt].join('/');
-  }
-
-  
-
- 
-  /**
-   * Make an API request to verify the access to an article using the provided access ID.
-   *
-   * @param {string} accessId - The ID of the article access to verify.
-   * @return {Promise<VerifyArticleAccessResponse>} The verification result
-   * @throws {ApiCallError} If the API call fails.
-   */
-  public async verifyArticleAccess(
-    accessId: string
-  ): Promise<VerifyArticleAccessResponse> {
-    return await this.makeApiRequest<VerifyArticleAccessResponse>(
-      [
-        PublicationSDK.ORIGIN,
-        PublicationSDK.API_PATH,
-        'verify-article-access'
-      ].join('/'),
-      { articleAccessId: accessId }
-    );
-  }
-
-  /**
-   * Makes an API request to the specified URL with the provided data.
-   *
-   * @param {string} apiUrl - The URL of the API endpoint to make the request to.
-   * @param {Record<string, unknown>} [postData] - Optional. The data to send in the request body (if method is POST).
-   * @return {Promise<T>} A promise that resolves to the response data in the specified type.
-   * @throws {ApiCallError} If the API call fails.
-   */
-  public async makeApiRequest<T extends Record<string, unknown>>(
-    apiUrl: string,
-    postData?: Record<string, unknown>
-  ): Promise<T> {
-    const headers = new Headers();
-    headers.set('Authorization', `Bearer ${this.publicationApiKey}`);
-    headers.set('Accept', 'application/json');
-    let method = 'GET';
-    let body: string | undefined = undefined;
-    if (postData) {
-      method = 'POST';
-      body = JSON.stringify(postData);
-      headers.set('Content-Length', body.length.toString());
-      headers.set('Content-Type', 'application/json');
-    }
-
-    const response = await this.fetch(apiUrl, {
-      method,
-      headers,
-      body
-    });
-
-    if (!response.ok) {
-      let message = 'Unknown error.';
-      try {
-        const data = await response.json();
-        if (
-          data &&
-          typeof data === 'object' &&
-          typeof data.message === 'string'
-        ) {
-          message = data.message;
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (_error) {
-        // ignore
-      }
-      throw new ApiCallError(message, response.status, response.statusText);
-    }
-    return await response.json();
+    return [ORIGIN, PURCHASE_LINK_PATH, jwt].join('/');
   }
 }

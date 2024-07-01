@@ -11,8 +11,6 @@ import {
   type Stub
 } from 'https://deno.land/std@0.224.0/testing/mock.ts';
 
-
-
 import {
   afterEach,
   beforeEach,
@@ -22,17 +20,20 @@ import {
 import { PublicationApiEndpoints } from './publication-api-endpoints.ts';
 import { MockFetch } from 'https://deno.land/x/deno_mock_fetch@1.0.1/mod.ts';
 import { ApiCallError } from './api-call-error.ts';
-import type { VerifyArticleAccessResponse } from "./types.ts";
-
+import type {
+ArticleResponse,
+  PublicationResponse,
+  VerifyArticleAccessResponse
+} from './types.ts';
 
 const apiKey = '0VaaIDZe1ctf6Nicbc0ohzTQtf7vZfCSJKSLjdCAAJ3n8AefiNyoD';
 
 describe('PublicationApiEndpoints.makeApiRequest', () => {
-  let sdk: PublicationApiEndpoints;
+  let endpoints: PublicationApiEndpoints;
   let mockFetch: MockFetch;
   beforeEach(() => {
     mockFetch = new MockFetch();
-    sdk = new PublicationApiEndpoints(apiKey);
+    endpoints = new PublicationApiEndpoints(apiKey);
   });
   afterEach(() => {
     mockFetch.close();
@@ -46,7 +47,7 @@ describe('PublicationApiEndpoints.makeApiRequest', () => {
         headers: { 'Content-Type': 'application/json' }
       });
 
-    const data = await sdk.makeApiRequest([]);
+    const data = await endpoints.makeApiRequest([]);
     assertEquals(data.foo, 'bar');
     assert(mockScope.metadata.request.method === 'GET');
   });
@@ -59,7 +60,7 @@ describe('PublicationApiEndpoints.makeApiRequest', () => {
         headers: { 'Content-Type': 'application/json' }
       });
 
-    const data = await sdk.makeApiRequest(['article'], { foo: 'bar' });
+    const data = await endpoints.makeApiRequest(['article'], { foo: 'bar' });
 
     assertEquals(data.foo, 'bar');
     assert(mockScope.metadata.request.method === 'POST');
@@ -74,7 +75,7 @@ describe('PublicationApiEndpoints.makeApiRequest', () => {
 
     await assertRejects(
       async () => {
-        await sdk.makeApiRequest([]);
+        await endpoints.makeApiRequest([]);
       },
       ApiCallError,
       'Unknown error.'
@@ -91,7 +92,7 @@ describe('PublicationApiEndpoints.makeApiRequest', () => {
 
     await assertRejects(
       async () => {
-        await sdk.makeApiRequest([]);
+        await endpoints.makeApiRequest([]);
       },
       ApiCallError,
       'bar'
@@ -100,11 +101,11 @@ describe('PublicationApiEndpoints.makeApiRequest', () => {
 });
 
 describe('PublicationApiEndpoints.verifyArticleAccess', () => {
-  let sdk: PublicationApiEndpoints;
+  let endpoints: PublicationApiEndpoints;
   let responseData: VerifyArticleAccessResponse;
-  let requestStub: Stub
+  let requestStub: Stub;
   beforeEach(() => {
-    sdk = new PublicationApiEndpoints(apiKey);
+    endpoints = new PublicationApiEndpoints(apiKey);
     responseData = {
       articleAccess: {
         articleId: 'bar',
@@ -130,18 +131,143 @@ describe('PublicationApiEndpoints.verifyArticleAccess', () => {
         organizationName: 'foo'
       }
     };
-   requestStub = stub(sdk, 'makeApiRequest', resolvesNext([responseData]));
+    requestStub = stub(
+      endpoints,
+      'makeApiRequest',
+      resolvesNext([responseData])
+    );
   });
   afterEach(() => {
     requestStub.restore();
-  })
+  });
   it('returns the right response', async () => {
-    const data = await sdk.verifyArticleAccess('foo');
+    const data = await endpoints.verifyArticleAccess('foo');
     assertEquals(data, responseData);
     assertSpyCall(requestStub, 0, {
-      args: [
-        'https://linketysplit.com/api/v1/publication/verify-article-access',
-        { articleAccessId: 'foo' }]
-    })
+      args: [['verify-article-access'], { articleAccessId: 'foo' }]
+    });
   });
 });
+describe('PublicationApiEndpoints.getPublication', () => {
+  let endpoints: PublicationApiEndpoints;
+  let responseData: PublicationResponse;
+  let requestStub: Stub;
+  beforeEach(() => {
+    endpoints = new PublicationApiEndpoints(apiKey);
+    responseData = {
+      publication: {
+        id: 'foo',
+        name: 'foo',
+        defaultPricing: { price: 10, discounts: [] },
+        verifiedDomains: ['foo.com'],
+        organizationName: 'foo'
+      }
+    };
+    requestStub = stub(
+      endpoints,
+      'makeApiRequest',
+      resolvesNext([responseData])
+    );
+  });
+  afterEach(() => {
+    requestStub.restore();
+  });
+  it('returns the right response', async () => {
+    const data = await endpoints.getPublication();
+    assertEquals(data, responseData);
+    assertSpyCall(requestStub, 0, {
+      args: [[]]
+    });
+  });
+});
+
+describe('PublicationApiEndpoints.getArticle', () => {
+  let endpoints: PublicationApiEndpoints;
+  let responseData: ArticleResponse;
+  let requestStub: Stub;
+  beforeEach(() => {
+    endpoints = new PublicationApiEndpoints(apiKey);
+    responseData = {
+      publication: {
+        id: 'foo',
+        name: 'foo',
+        defaultPricing: { price: 10, discounts: [] },
+        verifiedDomains: ['foo.com'],
+        organizationName: 'foo'
+      },
+      article: {
+        id: 'foo',
+        title: 'foo',
+        permalink: 'foo',
+        pricing: { price: 10, discounts: [] },
+        enabled: true,
+        publishedAt: new Date(),
+        description: 'foo',
+        image: 'foo',
+        publicationId: 'foo'
+      }
+    };
+    requestStub = stub(
+      endpoints,
+      'makeApiRequest',
+      resolvesNext([responseData])
+    );
+  });
+  afterEach(() => {
+    requestStub.restore();
+  });
+  it('returns the right response', async () => {
+    const data = await endpoints.getArticle('foo');
+    assertEquals(data, responseData);
+    assertSpyCall(requestStub, 0, {
+      args: [['article', 'foo']]
+    });
+  });
+});
+
+describe('PublicationApiEndpoints.upsertArticle', () => {
+  let endpoints: PublicationApiEndpoints;
+  let responseData: ArticleResponse;
+  let requestStub: Stub;
+  beforeEach(() => {
+    endpoints = new PublicationApiEndpoints(apiKey);
+    responseData = {
+      publication: {
+        id: 'foo',
+        name: 'foo',
+        defaultPricing: { price: 10, discounts: [] },
+        verifiedDomains: ['foo.com'],
+        organizationName: 'foo'
+      },
+      article: {
+        id: 'foo',
+        title: 'foo',
+        permalink: 'foo',
+        pricing: { price: 10, discounts: [] },
+        enabled: true,
+        publishedAt: new Date(),
+        description: 'foo',
+        image: 'foo',
+        publicationId: 'foo'
+      }
+    };
+    requestStub = stub(
+      endpoints,
+      'makeApiRequest',
+      resolvesNext([responseData])
+    );
+  });
+  afterEach(() => {
+    requestStub.restore();
+  });
+  it('returns the right response', async () => {
+    const data = await endpoints.upsertArticle('foo');
+    assertEquals(data, responseData);
+    assertSpyCall(requestStub, 0, {
+      args: [['article'], { permalink: 'foo' }]
+    });
+  });
+});
+
+
+
