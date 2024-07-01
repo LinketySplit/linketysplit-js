@@ -1,20 +1,8 @@
 import {
   assertEquals,
   assert,
-  assertMatch,
   assertRejects
 } from 'https://deno.land/std@0.224.0/assert/mod.ts';
-
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  it
-} from 'https://deno.land/std@0.224.0/testing/bdd.ts';
-import { PublicationSDK } from './publication-sdk.ts';
-import { jwtVerify } from 'npm:jose@5.6.2';
-import { MockFetch } from 'https://deno.land/x/deno_mock_fetch@1.0.1/mod.ts';
-import { ApiCallError, type VerifyArticleAccessResponse } from '../mod.ts';
 
 import {
   assertSpyCall,
@@ -23,81 +11,28 @@ import {
   type Stub
 } from 'https://deno.land/std@0.224.0/testing/mock.ts';
 
+
+
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it
+} from 'https://deno.land/std@0.224.0/testing/bdd.ts';
+import { PublicationApiEndpoints } from './publication-api-endpoints.ts';
+import { MockFetch } from 'https://deno.land/x/deno_mock_fetch@1.0.1/mod.ts';
+import { ApiCallError } from './api-call-error.ts';
+import type { VerifyArticleAccessResponse } from "./types.ts";
+
+
 const apiKey = '0VaaIDZe1ctf6Nicbc0ohzTQtf7vZfCSJKSLjdCAAJ3n8AefiNyoD';
 
-describe('PublicationSDK.createArticlePurchaseUrl', () => {
-  let sdk: PublicationSDK;
-
-  beforeEach(() => {
-    sdk = new PublicationSDK(apiKey);
-  });
-
-  it('creates the link with the right path', async () => {
-    const url = await sdk.createArticlePurchaseUrl(
-      'https://example.com/article'
-    );
-    assert(url);
-    assertMatch(url, /https:\/\/linketysplit\.com\/purchase-link/);
-  });
-  it('creates a jwt', async () => {
-    const url = await sdk.createArticlePurchaseUrl(
-      'https://example.com/article'
-    );
-    const jwt = url.split('/').pop();
-    assert(jwt);
-  });
-  it('signs jwt with the api key', async () => {
-    const url = await sdk.createArticlePurchaseUrl(
-      'https://example.com/article'
-    );
-    const jwt = url.split('/').pop();
-    assert(jwt);
-    const { payload } = await jwtVerify(jwt, new TextEncoder().encode(apiKey));
-    assertEquals(payload.permalink, 'https://example.com/article');
-  });
-  it('validates the article permalink', async () => {
-    await assertRejects(async () => {
-      await sdk.createArticlePurchaseUrl('http://example.com/article', {
-        price: NaN
-      });
-    });
-  });
-  it('validates the article pricing', async () => {
-    await assertRejects(async () => {
-      await sdk.createArticlePurchaseUrl('https://example.com/article', {
-        price: NaN
-      });
-    });
-  });
-  it('includes custom pricing in the jwt', async () => {
-    const url = await sdk.createArticlePurchaseUrl(
-      'https://example.com/article',
-      { price: 10 }
-    );
-    const jwt = url.split('/').pop();
-    assert(jwt);
-    const { payload } = await jwtVerify(jwt, new TextEncoder().encode(apiKey));
-    assertEquals(payload.customPricing, { price: 10, discounts: [] });
-  });
-  it('includes showSharingContext in the jwt', async () => {
-    const url = await sdk.createArticlePurchaseUrl(
-      'https://example.com/article',
-      { price: 10 },
-      true
-    );
-    const jwt = url.split('/').pop();
-    assert(jwt);
-    const { payload } = await jwtVerify(jwt, new TextEncoder().encode(apiKey));
-    assertEquals(payload.showSharingContext, true);
-  });
-});
-
-describe('PublicationSDK.makeApiRequest', () => {
-  let sdk: PublicationSDK;
+describe('PublicationApiEndpoints.makeApiRequest', () => {
+  let sdk: PublicationApiEndpoints;
   let mockFetch: MockFetch;
   beforeEach(() => {
     mockFetch = new MockFetch();
-    sdk = new PublicationSDK(apiKey);
+    sdk = new PublicationApiEndpoints(apiKey);
   });
   afterEach(() => {
     mockFetch.close();
@@ -111,7 +46,7 @@ describe('PublicationSDK.makeApiRequest', () => {
         headers: { 'Content-Type': 'application/json' }
       });
 
-    const data = await sdk.makeApiRequest(url);
+    const data = await sdk.makeApiRequest([]);
     assertEquals(data.foo, 'bar');
     assert(mockScope.metadata.request.method === 'GET');
   });
@@ -124,7 +59,7 @@ describe('PublicationSDK.makeApiRequest', () => {
         headers: { 'Content-Type': 'application/json' }
       });
 
-    const data = await sdk.makeApiRequest(url, { foo: 'bar' });
+    const data = await sdk.makeApiRequest(['article'], { foo: 'bar' });
 
     assertEquals(data.foo, 'bar');
     assert(mockScope.metadata.request.method === 'POST');
@@ -139,7 +74,7 @@ describe('PublicationSDK.makeApiRequest', () => {
 
     await assertRejects(
       async () => {
-        await sdk.makeApiRequest(url);
+        await sdk.makeApiRequest([]);
       },
       ApiCallError,
       'Unknown error.'
@@ -156,7 +91,7 @@ describe('PublicationSDK.makeApiRequest', () => {
 
     await assertRejects(
       async () => {
-        await sdk.makeApiRequest(url);
+        await sdk.makeApiRequest([]);
       },
       ApiCallError,
       'bar'
@@ -164,12 +99,12 @@ describe('PublicationSDK.makeApiRequest', () => {
   });
 });
 
-describe('PublicationSDK.verifyArticleAccess', () => {
-  let sdk: PublicationSDK;
+describe('PublicationApiEndpoints.verifyArticleAccess', () => {
+  let sdk: PublicationApiEndpoints;
   let responseData: VerifyArticleAccessResponse;
   let requestStub: Stub
   beforeEach(() => {
-    sdk = new PublicationSDK(apiKey);
+    sdk = new PublicationApiEndpoints(apiKey);
     responseData = {
       articleAccess: {
         articleId: 'bar',

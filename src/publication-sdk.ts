@@ -74,6 +74,7 @@ export class PublicationSDK {
    *
    * @param {string} accessId - The ID of the article access to verify.
    * @return {Promise<VerifyArticleAccessResponse>} The verification result
+   * @throws {ApiCallError} If the API call fails.
    */
   public async verifyArticleAccess(
     accessId: string
