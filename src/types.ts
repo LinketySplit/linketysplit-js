@@ -4,8 +4,8 @@
  * Article pricing discount data. Fields:
  * - `minimumQuantity` The minimum quantity of article aceesses that must be purchased
  * for the discount to be applied. Must be an integer greater than or equal to 2.
- * - `discountPercentage` The percentage discount to apply. An floating point number
- * greater than 0 and less than 100.
+ * - `discountPercentage` The percentage discount to apply. Must be greater than 0 and less than 100.
+ * Fractions are allowed.
  */
 export type ArticlePricingDiscountData = {
   minimumQuantity: number;

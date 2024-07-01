@@ -1,4 +1,9 @@
+/**
+ * An error returned by an API call.
+ * 
+ */
 export class ApiCallError extends Error {
+  
   public statusCode: number;
   public statusMessage: string;
 
