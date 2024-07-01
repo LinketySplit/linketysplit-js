@@ -1,6 +1,6 @@
 {
   "name": "@linketysplit/linketysplit-js",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "exports": "./mod.ts",
   "test": {
     "include": ["src/**/*.test.ts"]

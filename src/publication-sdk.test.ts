@@ -5,16 +5,15 @@ import {
   assertRejects
 } from 'https://deno.land/std@0.224.0/assert/mod.ts';
 
+
 import {
-  afterEach,
+afterEach,
   beforeEach,
   describe,
   it
 } from 'https://deno.land/std@0.224.0/testing/bdd.ts';
 import { PublicationSDK } from './publication-sdk.ts';
 import { jwtVerify } from 'npm:jose@5.6.2';
-import { MockFetch } from 'https://deno.land/x/deno_mock_fetch@1.0.1/mod.ts';
-import { ApiCallError, type VerifyArticleAccessResponse } from '../mod.ts';
 
 import {
   assertSpyCall,
@@ -22,6 +21,8 @@ import {
   resolvesNext,
   type Stub
 } from 'https://deno.land/std@0.224.0/testing/mock.ts';
+import { ARTICLE_ACCESS_LINK_PARAM } from './constants.ts';
+import { VerifyArticleAccessResponse } from "./types.ts";
 
 const apiKey = '0VaaIDZe1ctf6Nicbc0ohzTQtf7vZfCSJKSLjdCAAJ3n8AefiNyoD';
 
@@ -92,4 +93,64 @@ describe('PublicationSDK.createArticlePurchaseUrl', () => {
   });
 });
 
+describe('PublicationSDK.handleArticleRequestUrl ', () => {
+  let sdk: PublicationSDK;
+  let responseData: VerifyArticleAccessResponse;
+  let requestStub: Stub;
+  beforeEach(() => {
+    sdk = new PublicationSDK(apiKey);
+    responseData = {
+      articleAccess: {
+        articleId: 'bar',
+        purchaser: {
+          id: 'foo',
+          name: 'foo',
+          profileImageUrl: 'foo'
+        },
+        reader: {
+          id: 'foo',
+          name: 'foo',
+          profileImageUrl: 'foo'
+        },
+        articleAccessId: 'foo',
+        grantAccess: true,
+        purchaseId: 'foo'
+      },
+      publication: {
+        id: 'foo',
+        name: 'foo',
+        defaultPricing: { price: 10, discounts: [] },
+        verifiedDomains: ['foo.com'],
+        organizationName: 'foo'
+      }
+    };
+    requestStub = stub(
+      sdk.endpoints,
+      'makeApiRequest',
+      resolvesNext([responseData])
+    );
+  });
+  afterEach(() => {
+    requestStub.restore();
+  });
+  it('returns null if no article access ID is found in the URL', async () => {
+    const url = new URL('https://example.com/article');
+    const result = await sdk.handleArticleRequestUrl(url);
+    assert(result === null);
+  });
+  it('returns null if the article access ID is empty', async () => {
+    const url = new URL('https://example.com/article');
+    url.searchParams.set(ARTICLE_ACCESS_LINK_PARAM, '');
+    const result = await sdk.handleArticleRequestUrl(url);
+    assert(result === null);
+  });
+  it('returns the response if the article access ID is found in the URL', async () => {
+    const url = new URL('https://example.com/article');
+    url.searchParams.set(ARTICLE_ACCESS_LINK_PARAM, 'foo');
+    const result = await sdk.handleArticleRequestUrl(url);
+    assert(result);
+    assert(result === responseData);
 
+  });
+
+});
