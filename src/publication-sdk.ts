@@ -8,8 +8,10 @@ import {
   validateArticlePricing
 } from './validators.ts';
 import { ORIGIN, PURCHASE_LINK_PATH } from './constants.ts';
+import { PublicationApiEndpoints } from "./publication-api-endpoints.ts";
 
 export class PublicationSDK {
+  public readonly endpoints: PublicationApiEndpoints;
   /**
    * Constructor for the PublicationSDK class.
    *
@@ -19,7 +21,9 @@ export class PublicationSDK {
   constructor(
     public readonly publicationApiKey: string,
     public fetch: typeof globalThis.fetch = globalThis.fetch
-  ) {}
+  ) {
+    this.endpoints = new PublicationApiEndpoints(publicationApiKey, fetch);
+  }
 
   /**
    * Creates a purchase URL for an article, pointing to the LinketySplit
