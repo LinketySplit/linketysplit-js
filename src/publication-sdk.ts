@@ -10,18 +10,24 @@ import {
 } from './validators.ts';
 import { LINKETYSPLIT_ORIGIN, PURCHASE_LINK_PATH, ARTICLE_ACCESS_LINK_PARAM } from './constants.ts';
 import { PublicationApiEndpoints } from "./publication-api-endpoints.ts";
-
+import type { fetch as FetchType } from 'npm:@types/node';
+/**
+ * Tha main entrypoint for this library. Provides:
+ * - a method to create a purchase URL for an article
+ * - a method to inspect an article request URL to see if it is a LinketySplit article access URL
+ * - access to the publication API endpoints
+ */
 export class PublicationSDK {
   public readonly endpoints: PublicationApiEndpoints;
   /**
    * Constructor for the PublicationSDK class.
    *
    * @param {string} publicationApiKey - The API key for the publication
-   * @param {typeof globalThis.fetch} fetch - The fetch function to use for API calls, defaults to globalThis.fetch
+   * @param {typeof FetchType} fetch - The fetch function to use for API calls, defaults to globalThis.fetch
    */
   constructor(
     public readonly publicationApiKey: string,
-    public fetch: typeof globalThis.fetch = globalThis.fetch
+    public fetch: typeof FetchType = globalThis.fetch
   ) {
     this.endpoints = new PublicationApiEndpoints(publicationApiKey, fetch);
   }

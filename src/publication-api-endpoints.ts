@@ -5,6 +5,7 @@ import type {
   PublicationResponse,
   VerifyArticleAccessResponse
 } from './types.ts';
+import type { fetch as FetchType } from 'npm:@types/node';
 
 /**
  * Endpoint accessors for the LinketySplit publication API.
@@ -14,12 +15,12 @@ export class PublicationApiEndpoints {
    * Constructor for the PublicationApiEndpoints class.
    *
    * @param {string} publicationApiKey A publication API key
-   * @param {typeof globalThis.fetch} fetch The fetch function to use for API
+   * @param {typeof FetchType} fetch The fetch function to use for API
    * calls, defaults to globalThis.fetch
    */
   constructor(
     public readonly publicationApiKey: string,
-    public fetch: typeof globalThis.fetch = globalThis.fetch
+    public fetch: typeof FetchType = globalThis.fetch
   ) {}
 
   /**
