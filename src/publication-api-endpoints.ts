@@ -5,7 +5,7 @@ import type {
   PublicationResponse,
   VerifyArticleAccessResponse
 } from './types.ts';
-import type { fetch as FetchType } from 'npm:@types/node';
+import type { fetch as FetchType } from 'npm:@types/node@18.11.18';
 
 /**
  * Endpoint accessors for the LinketySplit publication API.

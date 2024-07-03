@@ -10,7 +10,7 @@ import {
 } from './validators.ts';
 import { LINKETYSPLIT_ORIGIN, PURCHASE_LINK_PATH, ARTICLE_ACCESS_LINK_PARAM } from './constants.ts';
 import { PublicationApiEndpoints } from "./publication-api-endpoints.ts";
-import type { fetch as FetchType } from 'npm:@types/node';
+import type { fetch as FetchType } from 'npm:@types/node@18.11.18';
 /**
  * Tha main entrypoint for this library. Provides:
  * - a method to create a purchase URL for an article
