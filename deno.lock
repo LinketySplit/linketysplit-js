@@ -684,6 +684,11 @@
   "workspace": {
     "dependencies": [
       "npm:jose@^5.6.2"
-    ]
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:@jsr/linketysplit__linketysplit-js@^0.1.9"
+      ]
+    }
   }
 }

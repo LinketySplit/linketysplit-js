@@ -52,10 +52,10 @@ export class PublicationSDK {
     showSharingContext?: boolean
   ): Promise<string> {
     const payload: ArticlePurchaseUrlPayload = {
-      permalink: validateArticlePermalink(permalink)
+      permalink
     };
     if (customPricing) {
-      payload.customPricing = validateArticlePricing(customPricing);
+      payload.customPricing = customPricing
     }
     if (showSharingContext === true) {
       payload.showSharingContext = true;
@@ -82,7 +82,7 @@ export class PublicationSDK {
    * VerifyArticleAccessResponse object if a LinketySplit article access ID is 
    * found in the URL, or null if not.
    */
-  async handleArticleRequestUrl(requestUrl: URL): Promise<VerifyArticleAccessResponse|null> {
+  public async handleArticleRequestUrl(requestUrl: URL): Promise<VerifyArticleAccessResponse|null> {
     if (requestUrl.searchParams.has(ARTICLE_ACCESS_LINK_PARAM)) {
       const accessId = requestUrl.searchParams.get(ARTICLE_ACCESS_LINK_PARAM);
       if (accessId) {
