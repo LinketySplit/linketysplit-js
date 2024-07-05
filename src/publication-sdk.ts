@@ -15,16 +15,20 @@ import { ApiCallError } from "../mod.ts";
  * - access to the publication API endpoints
  */
 export class PublicationSDK {
-  protected static LINKETYSPLIT_ORIGIN = 'https://linketysplit.com';
-  protected static PURCHASE_LINK_PATH = 'purchase-link';
-  protected static PUBLICATION_API_PATH = 'api/v1/publication';
-  protected static ARTICLE_ACCESS_LINK_PARAM = 'linketysplit_access';
+  /**
+   * The origin of LinketySplit.
+   * Provided here for development purposes.
+   */
+  public static readonly ORIGIN: string = 'https://linketysplit.com';
+  public static readonly PURCHASE_LINK_PATH = 'purchase-link';
+  public static readonly PUBLICATION_API_PATH = 'api/v1/publication';
+  public static readonly ARTICLE_ACCESS_LINK_PARAM = 'linketysplit_access';
 
   /**
    * Constructor for the PublicationSDK class.
    *
-   * @param {string} publicationApiKey - The API key for the publication
-   * @param {typeof FetchType} fetch - The fetch function to use for API calls, defaults to globalThis.fetch
+   * @param {string} publicationApiKey The API key for the publication
+   * @param {typeof FetchType} fetch The fetch function to use for API calls, defaults to globalThis.fetch
    */
   constructor(
     public readonly publicationApiKey: string,
@@ -67,7 +71,7 @@ export class PublicationSDK {
       .setProtectedHeader({ alg })
       .setIssuedAt();
     const jwt = await signer.sign(encodedSecret);
-    return [PublicationSDK.LINKETYSPLIT_ORIGIN, PublicationSDK.PURCHASE_LINK_PATH, jwt].join('/');
+    return [PublicationSDK.ORIGIN, PublicationSDK.PURCHASE_LINK_PATH, jwt].join('/');
   }
 
 
@@ -156,7 +160,7 @@ export class PublicationSDK {
     postData?: Record<string, unknown>
   ): Promise<T> {
     const parts = [
-      PublicationSDK.LINKETYSPLIT_ORIGIN,
+      PublicationSDK.ORIGIN,
       PublicationSDK.PUBLICATION_API_PATH,
       ...slugs.map((slug) => encodeURIComponent(slug))
     ];
@@ -199,3 +203,4 @@ export class PublicationSDK {
     return await response.json();
   }
 }
+

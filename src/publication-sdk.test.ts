@@ -21,7 +21,6 @@ import {
   resolvesNext,
   type Stub
 } from 'https://deno.land/std@0.224.0/testing/mock.ts';
-import { ARTICLE_ACCESS_LINK_PARAM } from './constants.ts';
 import type {
   ArticleResponse,
   PublicationResponse,
@@ -145,13 +144,13 @@ describe('PublicationSDK.handleArticleRequestUrl ', () => {
   });
   it('returns null if the article access ID is empty', async () => {
     const url = new URL('https://example.com/article');
-    url.searchParams.set(ARTICLE_ACCESS_LINK_PARAM, '');
+    url.searchParams.set(PublicationSDK.ARTICLE_ACCESS_LINK_PARAM, '');
     const result = await sdk.handleArticleRequestUrl(url);
     assert(result === null);
   });
   it('returns the response if the article access ID is found in the URL', async () => {
     const url = new URL('https://example.com/article');
-    url.searchParams.set(ARTICLE_ACCESS_LINK_PARAM, 'foo');
+    url.searchParams.set(PublicationSDK.ARTICLE_ACCESS_LINK_PARAM, 'foo');
     const result = await sdk.handleArticleRequestUrl(url);
     assert(result);
     assert(result === responseData);
