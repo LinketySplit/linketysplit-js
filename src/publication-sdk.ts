@@ -104,20 +104,20 @@ export class PublicationSDK {
  *
  * @param {Object} options - The options for generating the meta tags.
  * @param {boolean} [options.enabled] - Required. Indicates whether LinketySplit purchases are currently enabled. 
- * @param {ArticlePricingData} [options.articlePricing] - Optional. The article's pricing. If not included, the publication's default pricing will be used.
+ * @param {ArticlePricingData} [options.pricing] - Optional. The article's pricing. If not included, the publication's default pricing will be used.
  * @param {Date|string} [options.publishedTime] - Optional, but make sure  you include an article:published_time meta tag elsewhere. 
- * @param {string} [options.articleTitle] - The title of the article.
- * @param {string} [options.articleDescription] - The description of the article.
- * @param {string} [options.articleImage] - The image URL of the article.
+ * @param {string} [options.title] - The title of the article.
+ * @param {string} [options.description] - The description of the article.
+ * @param {string} [options.image] - The image URL of the article.
  * @return {string} The generated HTML meta tags.
  */
   public getMetaTagHtml(options:{
     enabled: boolean;
-    articlePricing?: ArticlePricingData;
+    pricing?: ArticlePricingData;
     publishedTime?: Date|string;
-    articleTitle?: string;
-    articleDescription?: string;
-    articleImage?: string;
+    title?: string;
+    description?: string;
+    image?: string;
   }): string {
     const metas: string[] = [
       `<meta property="linketysplit:enabled" content="${options.enabled? 'true': 'false'}" />`,
@@ -126,18 +126,18 @@ export class PublicationSDK {
       const d = new Date(options.publishedTime);
       metas.push(`<meta name="linketysplit:published_time" content="${d.toISOString()}" />`);
     }
-    if (options.articlePricing) {
-      const json = JSON.stringify(options.articlePricing).replaceAll(/"/g, '&quot;');
+    if (options.pricing) {
+      const json = JSON.stringify(options.pricing).replaceAll(/"/g, '&quot;');
       metas.push(`<meta name="linketysplit:article_pricing" content="${json}" />`);
     }
-    if (options.articleTitle) {
-      metas.push(`<meta name="linketysplit:title" content="${options.articleTitle.replaceAll(/"/g, '&quot;')}" />`);
+    if (options.title) {
+      metas.push(`<meta name="linketysplit:title" content="${options.title.replaceAll(/"/g, '&quot;')}" />`);
     }
-    if (options.articleDescription) {
-      metas.push(`<meta name="linketysplit:description" content="${options.articleDescription.replaceAll(/"/g, '&quot;')}" />`);
+    if (options.description) {
+      metas.push(`<meta name="linketysplit:description" content="${options.description.replaceAll(/"/g, '&quot;')}" />`);
     }
-    if (options.articleImage) {
-      metas.push(`<meta name="linketysplit:image" content="${options.articleImage.replaceAll(/"/g, '&quot;')}" />`);
+    if (options.image) {
+      metas.push(`<meta name="linketysplit:image" content="${options.image.replaceAll(/"/g, '&quot;')}" />`);
     }
     return metas.join('\n');
   }
