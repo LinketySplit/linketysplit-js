@@ -128,7 +128,7 @@ export class PublicationSDK {
     }
     if (options.pricing) {
       const json = JSON.stringify(options.pricing).replaceAll(/"/g, '&quot;');
-      metas.push(`<meta name="linketysplit:article_pricing" content="${json}" />`);
+      metas.push(`<meta name="linketysplit:pricing" content="${json}" />`);
     }
     if (options.title) {
       metas.push(`<meta name="linketysplit:title" content="${options.title.replaceAll(/"/g, '&quot;')}" />`);
