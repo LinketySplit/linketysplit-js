@@ -120,7 +120,7 @@ export class PublicationSDK {
     articleImage?: string;
   }): string {
     const metas: string[] = [
-      `<meta property="linketysplit:enabled" content="${options.linketysplitEnabled? 'true': 'false'}" />`,
+      `<meta property="linketysplit:enabled" content="${options.enabled? 'true': 'false'}" />`,
     ];
     if (options.publishedTime) {
       const d = new Date(options.publishedTime);
