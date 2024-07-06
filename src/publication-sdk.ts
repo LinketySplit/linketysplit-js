@@ -74,6 +74,73 @@ export class PublicationSDK {
     return [PublicationSDK.ORIGIN, PublicationSDK.PURCHASE_LINK_PATH, jwt].join('/');
   }
 
+/**
+ * Generates HTML meta tags based on the provided options.
+ * 
+ * The generated meta tags:
+ * ```html
+ * <!-- Always required if you want to enable LinketySplit purchases for this article -->
+ * <meta name="linketysplit:enabled" content="true" /> 
+ * 
+ * <!-- Optional article pricing. If you do not include this tag, LinketySplit will use the publication's default pricing -->
+ * <meta name="linketysplit:pricing" content="{&quot;price&quot;:100}" />
+ * 
+ * <!-- Required if you do not include an article:published_time meta tag elsewhere -->
+ * <meta name="linketysplit:published_time" content="2024-07-06T16:06:19.431Z" />
+ * 
+ * <!-- Required if you do not include an og:title meta tag elsewhere -->
+ * <meta name="linketysplit:title" content="The title of the article" />
+ * 
+ * <!-- Required if you do not include an og:description meta tag elsewhere -->
+ * <meta name="linketysplit:description" content="The description of the article" />
+ * 
+ * <!-- Optional. You can also use an og:image meta tag -->
+ * <meta name="linketysplit:image" content="https://example.com/image.png" />
+ * 
+ * ``` 
+ * 
+ * The only required key is `options.enabled`. the other keys are optional, as long as you 
+ * include the corresponding `og:*` meta tag on the article page.
+ *
+ * @param {Object} options - The options for generating the meta tags.
+ * @param {boolean} [options.enabled] - Required. Indicates whether LinketySplit purchases are currently enabled. 
+ * @param {ArticlePricingData} [options.articlePricing] - Optional. The article's pricing. If not included, the publication's default pricing will be used.
+ * @param {Date|string} [options.publishedTime] - Optional, but make sure  you include an article:published_time meta tag elsewhere. 
+ * @param {string} [options.articleTitle] - The title of the article.
+ * @param {string} [options.articleDescription] - The description of the article.
+ * @param {string} [options.articleImage] - The image URL of the article.
+ * @return {string} The generated HTML meta tags.
+ */
+  public getMetaTagHtml(options:{
+    enabled: boolean;
+    articlePricing?: ArticlePricingData;
+    publishedTime?: Date|string;
+    articleTitle?: string;
+    articleDescription?: string;
+    articleImage?: string;
+  }): string {
+    const metas: string[] = [
+      `<meta property="linketysplit:enabled" content="${options.linketysplitEnabled? 'true': 'false'}" />`,
+    ];
+    if (options.publishedTime) {
+      const d = new Date(options.publishedTime);
+      metas.push(`<meta name="linketysplit:published_time" content="${d.toISOString()}" />`);
+    }
+    if (options.articlePricing) {
+      const json = JSON.stringify(options.articlePricing).replaceAll(/"/g, '&quot;');
+      metas.push(`<meta name="linketysplit:article_pricing" content="${json}" />`);
+    }
+    if (options.articleTitle) {
+      metas.push(`<meta name="linketysplit:title" content="${options.articleTitle.replaceAll(/"/g, '&quot;')}" />`);
+    }
+    if (options.articleDescription) {
+      metas.push(`<meta name="linketysplit:description" content="${options.articleDescription.replaceAll(/"/g, '&quot;')}" />`);
+    }
+    if (options.articleImage) {
+      metas.push(`<meta name="linketysplit:image" content="${options.articleImage.replaceAll(/"/g, '&quot;')}" />`);
+    }
+    return metas.join('\n');
+  }
 
   /**
    * Inspects an article request URL to see if it is a LinketySplit article access URL.
@@ -203,4 +270,3 @@ export class PublicationSDK {
     return await response.json();
   }
 }
-
